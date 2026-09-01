@@ -6,10 +6,12 @@ import { fetchTemplateHtml, buildMatrixPromptForCustomTemplate, buildSpecsPrompt
 
 // --- API Key Management (localStorage-based) ---
 const API_KEY_STORAGE_KEY = 'examcraft_api_key';
-const MODEL_STORAGE_KEY = 'examcraft_selected_model';
 const MODEL_ALIASES: Record<string, string> = {
-  'gemini-3-flash-preview': 'gemini-3.5-flash',
-  'gemini-3-pro-preview': 'gemini-3.1-pro-preview',
+  'gemini-3-flash-preview': 'gemini-2.5-flash',
+  'gemini-3-pro-preview': 'gemini-2.5-pro',
+  'gemini-3.5-flash': 'gemini-2.5-flash',
+  'gemini-3.1-pro-preview': 'gemini-2.5-pro',
+  'gemini-3.1-flash-lite': 'gemini-2.5-flash-lite',
 };
 
 export const GOOGLE_AI_API_KEY_PATTERN = /^(?:AIzaSy|AQ)\S{8,}$/;

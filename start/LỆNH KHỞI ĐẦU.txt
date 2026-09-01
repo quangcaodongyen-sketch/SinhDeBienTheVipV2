@@ -1,0 +1,7 @@
+Giúp tôi rà soát app,sửa lỗi, bổ sung tính năng app (nếu có) theo lệnh dưới đây
+Trước khi làm bất cứ điều gì, hãy:
+1. Đọc các skill (trong thư mục .agent/skills/); các skill trong 2 thư mục gemini-model và google-api để cập nhật chức năng api mới của google
+2. Khám phá cấu trúc project hiện tại: đọc package.json, src/, các file chính
+3. Xem thư mục "start" Làm đúng quy trình BRAINSTORM trong skill 1.md, tham khảo các file giaodien.md; visit.md; thực thi nghiêm ngặt file api.md
+4. Khi tôi phê duyệt kế hoạch hoặc bổ sung thêm vào kế hoạch thì mới bắt đầu làm việc.
+5. Đảm bảo app có thể tải lên github và deloy được qua vercel.com mà không bị lỗi.

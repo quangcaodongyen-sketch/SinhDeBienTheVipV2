@@ -60,11 +60,19 @@ const App: React.FC = () => {
 
   // -- Auth & VIP State --
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    return localStorage.getItem('examcraft_auth') === 'true';
+    try {
+      return localStorage.getItem('examcraft_auth') === 'true';
+    } catch {
+      return false;
+    }
   });
   const [loggedInUser, setLoggedInUser] = useState<UserAccount | null>(() => {
-    const saved = localStorage.getItem('examcraft_user');
-    return saved ? JSON.parse(saved) : null;
+    try {
+      const saved = localStorage.getItem('examcraft_user');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
   });
 
   // Modal triggers
