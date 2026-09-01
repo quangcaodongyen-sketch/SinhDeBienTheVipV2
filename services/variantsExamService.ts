@@ -74,7 +74,7 @@ Hệ thống là một cỗ máy tự học thông minh. Bất kỳ đề thi n�
 
 ## 4. QUY TẮC ĐỊNH DẠNG:
 - Xuất văn bản Markdown thuần túy, sạch sẽ, chuẩn xác.
-- ⛔ **TUYỆT ĐỐI KHÔNG DÙNG THẺ `<br>` TRONG VĂN BẢN:**
+- ⛔ **TUYỆT ĐỐI KHÔNG DÙNG THẺ BR (XUỐNG DÒNG) TRONG VĂN BẢN:**
   + Để xuống dòng: Nhấn Enter bình thường trong Markdown.
   + Các phương án A, B, C, D: Bắt buộc nằm ở dòng mới bên dưới câu hỏi.
 - ⛔ KHÔNG bọc toàn bộ nội dung trong cặp dấu code block markdown.
