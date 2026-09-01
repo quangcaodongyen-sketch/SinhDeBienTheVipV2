@@ -3,6 +3,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import remarkGfm from 'remark-gfm';
+import { cleanContentForWord } from '../services/exportUtils';
 
 interface MarkdownRendererProps {
   content: string;
@@ -10,6 +11,8 @@ interface MarkdownRendererProps {
 }
 
 const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, className }) => {
+  const processedContent = cleanContentForWord(content);
+
   return (
     <div className={`markdown-content ${className || ''}`}>
       <ReactMarkdown
@@ -52,7 +55,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, className 
           }
         }}
       >
-        {content}
+        {processedContent}
       </ReactMarkdown>
     </div>
   );

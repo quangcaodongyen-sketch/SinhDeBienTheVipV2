@@ -75,6 +75,7 @@ QUY TẮC CÔNG THỨC TOÁN HỌC (BẮT BUỘC)
 - KHÔNG ĐƯỢC viết: $\\text{cos}x$ ❌ → PHẢI viết: $\\cos x$ ✅
 - KHÔNG ĐƯỢC viết: $\\text{log}x$ ❌ → PHẢI viết: $\\log x$ ✅
 - KHÔNG ĐƯỢC dùng \\text{} để bọc tên hàm toán học. \\text{} chỉ dùng cho chữ tiếng Việt bình thường.
+- ĐỐI VỚI ĐỀ TIẾNG ANH VÀ MÔN XÃ HỘI: TUYỆT ĐỐI KHÔNG dùng dấu $ hay \\text{} cho các cấu trúc ngữ pháp (ví dụ: viết `S + will + V_inf` dạng plain text, KHÔNG viết $\\text{Subject} + ...$).
 
 ═══════════════════════════════════════
 ĐỊNH DẠNG XUẤT RA
