@@ -1,6 +1,4 @@
 import MarkdownIt from 'markdown-it';
-// @ts-ignore
-import { asBlob } from 'html-docx-js-typescript';
 
 const md = new MarkdownIt({
   html: true,

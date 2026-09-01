@@ -7,8 +7,6 @@
  * 3. Merge: text từ XML, hình từ mammoth
  */
 
-import mammoth from 'mammoth';
-
 export interface DocxParseResult {
   text: string;
   images: { base64: string; mimeType: string }[];
@@ -119,6 +117,9 @@ const extractImagesViaMammoth = async (arrayBuffer: ArrayBuffer): Promise<{
 }> => {
   const images: { base64: string; mimeType: string }[] = [];
   
+  const mammothModule = await import('mammoth');
+  const mammoth = mammothModule.default || mammothModule;
+
   const result = await mammoth.convertToHtml(
     { arrayBuffer },
     {
