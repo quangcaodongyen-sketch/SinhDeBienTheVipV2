@@ -158,4 +158,6 @@ Yêu cầu cụ thể:
     console.error(`[Variants] Error Step ${stepNumber}:`, error);
     throw error;
   }
+};
+
 
