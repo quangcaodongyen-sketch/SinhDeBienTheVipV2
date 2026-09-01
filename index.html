@@ -580,6 +580,22 @@
     }
   </style>
   <link rel="stylesheet" href="/index.css">
+  <script>
+    window.addEventListener('error', function(e) {
+      console.error('[Global Error]', e);
+      var errDiv = document.getElementById('global-error-box');
+      if (!errDiv) {
+        errDiv = document.createElement('div');
+        errDiv.id = 'global-error-box';
+        errDiv.style.cssText = 'position:fixed;top:20px;left:20px;right:20px;z-index:999999;background:#fff1f2;border:2px solid #e11d48;border-radius:8px;padding:20px;font-family:sans-serif;color:#881337;box-shadow:0 10px 25px rgba(0,0,0,0.2);';
+        document.body.appendChild(errDiv);
+      }
+      errDiv.innerHTML = '<h3 style="margin-top:0;color:#e11d48;">⚠️ Phát hiện lỗi khởi chạy trang:</h3>' +
+        '<pre style="white-space:pre-wrap;background:#ffe4e6;padding:10px;border-radius:4px;font-size:13px;">' + (e.error ? (e.error.stack || e.error.message) : e.message) + '</pre>' +
+        '<p><strong>Tệp gây lỗi:</strong> ' + (e.filename || 'Chưa rõ') + ' (dòng ' + e.lineno + ')</p>' +
+        '<button onclick="localStorage.clear();window.location.reload()" style="background:#e11d48;color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-weight:bold;">Xóa cache & Tải lại</button>';
+    });
+  </script>
 </head>
 
 <body class="bg-white text-black h-screen">
