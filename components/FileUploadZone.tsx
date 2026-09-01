@@ -1,7 +1,5 @@
 import React, { useCallback, useState, useRef } from 'react';
 import { Upload, FileText, X, AlertCircle } from 'lucide-react';
-// @ts-ignore
-import mammoth from 'mammoth';
 
 interface FileUploadZoneProps {
   onFileSelect: (fileData: { base64: string; mimeType: string; name: string }) => void;
@@ -49,6 +47,8 @@ const FileUploadZone: React.FC<FileUploadZoneProps> = ({
     // Nếu là file Word .docx, dùng mammoth để trích xuất nội dung văn bản sạch
     if (isDocx) {
       try {
+        const mammothModule = await import('mammoth');
+        const mammoth = mammothModule.default || mammothModule;
         const arrayBuffer = await file.arrayBuffer();
         const result = await mammoth.extractRawText({ arrayBuffer });
         const text = result.value || '';
