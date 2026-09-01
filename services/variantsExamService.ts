@@ -18,10 +18,11 @@ Nhiệm vụ duy nhất của bạn: **KHÓA 100% THEO ĐỀ MẪU, CHỈ THAY �
 - **Học kiểu chữ viết đậm hay viết thường của đề mẫu:**
   + Bắt chước chính xác phong cách viết in đậm, in nghiêng hay viết thường của đề mẫu ở từng câu hỏi hoặc đề bài (ví dụ: đề mẫu viết **Part 1.** hay *Part 1.* hay **Câu 1.** hay Câu 1: thì làm y hệt).
 - **Cấu trúc & Thứ tự các phần:** Đề mẫu có những phần nào (Part 1, Part 2... hoặc PHẦN I, PHẦN II... hoặc Câu 1, Câu 2...), có bao nhiêu câu, loại câu nào ➔ Đề biến thể giữ nguyên vẹn 100% cấu trúc, tên phần và số lượng câu như vậy.
-- **Cách đánh số câu & bố trí phương án A, B, C, D thẳng hàng:**
-  + Đề mẫu đánh số '1.', '2.' hay 'Câu 1:', 'Câu 2.' hay 'Bài 1.' ➔ Phải đánh số y hệt đề mẫu.
+- **Quy chuẩn dóng hàng & căn lề văn bản:**
+  + **Đoạn văn có từ 2 dòng trở lên (Paragraphs):** Tụt lề 1.27cm ở dòng đầu tiên, các dòng sau thẳng bằng lề, căn đều 2 bên (Justify).
+  + **Các dòng ngắn (tiêu đề câu, dòng đề mục ngắn):** Căn lề trái, thụt lề 1.27cm.
   + **BỐ TRÍ ĐÁP ÁN A, B, C, D DÓNG THẲNG HÀNG:**
-    * **Nếu các phương án ngắn gọn (từ đơn, số, cụm từ ngắn):** BẮT BUỘC đưa cả 4 phương án lên **TRÊN CÙNG 1 DÒNG** và dóng thẳng hàng nhau (cách nhau khoảng cách đều):  
+    * **Nếu các phương án ngắn gọn (từ đơn, số, cụm từ ngắn):** BẮT BUỘC đưa cả 4 phương án lên **TRÊN CÙNG 1 DÒNG** và dóng thẳng hàng tuyệt đối:  
       **A.** True &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **B.** False  
       **A.** $x = 1$ &nbsp;&nbsp;&nbsp;&nbsp; **B.** $x = 2$ &nbsp;&nbsp;&nbsp;&nbsp; **C.** $x = 3$ &nbsp;&nbsp;&nbsp;&nbsp; **D.** $x = 4$  
       **A.** reuse &nbsp;&nbsp;&nbsp;&nbsp; **B.** recycle &nbsp;&nbsp;&nbsp;&nbsp; **C.** reduce &nbsp;&nbsp;&nbsp;&nbsp; **D.** repair  

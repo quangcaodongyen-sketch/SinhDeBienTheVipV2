@@ -148,13 +148,21 @@ export const exportToDoc = async (
   // 6. Gán class MsoNormal cho tất cả thẻ <p>
   htmlBody = htmlBody.replace(/<p>/gi, '<p class="MsoNormal">');
 
-  // 7. Nhận diện và biến bảng đầu trang thành Bảng không viền (Header Table)
+  // 7. Nhận diện và biến bảng đầu trang (Header Table) & bảng đáp án ABCD thành Bảng không viền (Borderless Table)
   htmlBody = htmlBody.replace(/<table[^>]*>([\s\S]*?)<\/table>/gi, (match, inner) => {
+    // Bảng đầu trang
     if ((inner.includes('UBND') || inner.includes('TRƯỜNG') || inner.includes('PHÒNG GD') || inner.includes('SỞ GD')) && (inner.includes('BÀI KIỂM TRA') || inner.includes('ĐỀ KIỂM TRA') || inner.includes('ĐỀ THI') || inner.includes('HỌC KỲ') || inner.includes('HỌC KÌ'))) {
       const cleanedInner = inner
         .replace(/<td[^>]*>/gi, '<td style="border: none !important; padding: 2pt 4pt; vertical-align: top; text-align: center; text-indent: 0cm;">')
         .replace(/<th[^>]*>/gi, '<th style="border: none !important; padding: 2pt 4pt; vertical-align: top; text-align: center; background: transparent; font-weight: bold; text-indent: 0cm;">');
       return `<table class="header-table" style="border: none !important; border-collapse: collapse; width: 100%; margin-bottom: 6pt; text-indent: 0cm;">${cleanedInner}</table>`;
+    }
+    // Bảng đáp án A, B, C, D (dóng cột thẳng hàng)
+    if (inner.includes('A.') && inner.includes('B.') && (inner.includes('C.') || inner.includes('D.'))) {
+      const cleanedOptions = inner
+        .replace(/<td[^>]*>/gi, '<td style="border: none !important; padding: 2pt 6pt; vertical-align: top; text-align: left; text-indent: 0cm;">')
+        .replace(/<th[^>]*>/gi, '<th style="border: none !important; padding: 2pt 6pt; vertical-align: top; text-align: left; background: transparent; text-indent: 0cm;">');
+      return `<table class="options-table" style="border: none !important; border-collapse: collapse; width: 100%; margin: 2pt 0 4pt 0; text-indent: 0cm;">${cleanedOptions}</table>`;
     }
     return match;
   });
