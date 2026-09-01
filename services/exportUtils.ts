@@ -21,9 +21,13 @@ export const cleanContentForWord = (content: string): string => {
   // 0. Bóc bỏ triệt để các khối code block ```markdown ... ``` hoặc ``` ... ``` nếu Gemini bọc ngoài
   text = text.replace(/^```[a-zA-Z]*\r?\n?/gm, '').replace(/\r?\n?```$/gm, '');
 
-  // 1. Loại bỏ các thẻ HTML rác có thể làm vỡ parser markdown-it
+  // 1. Loại bỏ các thẻ HTML rác và xử lý thông minh thẻ <br>
   text = text.replace(/<div[^>]*style="[^"]*page-break[^"]*"[^>]*><\/div>/gi, '\n\n***\n\n');
   text = text.replace(/<div[^>]*>/gi, '\n').replace(/<\/div>/gi, '\n');
+  // Loại bỏ các thẻ <br> đứng lẻ loi trên một dòng riêng
+  text = text.replace(/^\s*<br\s*\/?>\s*$/gmi, '');
+  // Chuyển đổi <br> nằm giữa văn bản thông thường (ngoài bảng) thành 2 dấu cách + xuống dòng chuẩn Markdown
+  text = text.replace(/([^\|\n])\s*<br\s*\/?>\s*([^\|\n])/gi, '$1  \n$2');
 
   // 2. Loại bỏ \text{...}, \mathrm{...}, \mathbf{...} lặp lại
   for (let i = 0; i < 5; i++) {
@@ -145,8 +149,16 @@ export const exportToDoc = async (
   htmlBody = htmlBody.replace(/<pre><code[^>]*>([\s\S]*?)<\/code><\/pre>/gi, '<p class="MsoNormal" style="text-indent: 0cm;">$1</p>');
   htmlBody = htmlBody.replace(/<code[^>]*>([\s\S]*?)<\/code>/gi, '<span>$1</span>');
 
-  // 6. Gán class MsoNormal cho tất cả thẻ <p>
-  htmlBody = htmlBody.replace(/<p>/gi, '<p class="MsoNormal">');
+  // 6. Tự động định dạng các đoạn văn (Paragraphs) thông minh:
+  // - Đoạn văn nhiều dòng (trên 130 ký tự): Thụt đầu dòng 1.27cm (36pt), dòng sau sát lề, căn đều 2 bên (Justify).
+  // - Câu hỏi ngắn & phương án: Căn lề trái tự nhiên (Left), không bị giãn chữ.
+  htmlBody = htmlBody.replace(/<p>([\s\S]*?)<\/p>/gi, (match, inner) => {
+    const plainText = inner.replace(/<[^>]+>/g, '').trim();
+    if (plainText.length > 130 && !plainText.startsWith('A.') && !plainText.startsWith('B.') && !plainText.startsWith('C.') && !plainText.startsWith('D.')) {
+      return `<p class="MsoNormal passage" style="text-align: justify; text-indent: 36.0pt; margin-bottom: 4.0pt;">${inner}</p>`;
+    }
+    return `<p class="MsoNormal" style="text-align: left; text-indent: 0cm; margin-bottom: 3.5pt;">${inner}</p>`;
+  });
 
   // 7. Nhận diện và biến bảng đầu trang (Header Table) & bảng đáp án ABCD thành Bảng không viền (Borderless Table)
   htmlBody = htmlBody.replace(/<table[^>]*>([\s\S]*?)<\/table>/gi, (match, inner) => {
