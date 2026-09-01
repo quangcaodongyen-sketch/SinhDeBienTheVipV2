@@ -19,6 +19,10 @@ export const cleanContentForWord = (content: string): string => {
   // 0. Bóc bỏ triệt để các khối code block ```markdown ... ``` hoặc ``` ... ``` nếu Gemini bọc ngoài
   text = text.replace(/^```[a-zA-Z]*\r?\n?/gm, '').replace(/\r?\n?```$/gm, '');
 
+  // 0.1. Tự động loại bỏ triệt để mọi câu chào hỏi, lời dẫn của AI ở đầu đề thi
+  text = text.replace(/^[\s\S]*?(?=\|[\s\S]*?(?:UBND|TRƯỜNG|PHÒNG GD|SỞ GD|BÀI KIỂM TRA|ĐỀ KIỂM TRA|ĐỀ THI|HỌC KỲ|HỌC KÌ))/i, '');
+  text = text.replace(/^(?:Hệ thống đã phân tích|Dưới đây là|Chào bạn|Đây là đề|Sau đây là|Tôi đã học|Chúng tôi đã|Đề thi biến thể)[\s\S]*?\n\n/i, '');
+
   // 1. Loại bỏ các thẻ HTML rác và xử lý thông minh thẻ <br>
   text = text.replace(/<div[^>]*style="[^"]*page-break[^"]*"[^>]*><\/div>/gi, '\n\n***\n\n');
   text = text.replace(/<div[^>]*>/gi, '\n').replace(/<\/div>/gi, '\n');
