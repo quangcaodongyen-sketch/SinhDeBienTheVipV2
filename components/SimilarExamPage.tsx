@@ -158,7 +158,7 @@ const SimilarExamPage: React.FC<SimilarExamPageProps> = ({
             onClear={() => setFileData(null)}
             isLoading={status === 'analyzing'}
             label="Kéo thả đề thi mẫu vào đây"
-            sublabel="Hỗ trợ PDF, JPG, PNG"
+            sublabel="Hỗ trợ Word (.docx, .doc), PDF (.pdf), Ảnh (JPG, JPEG, PNG)"
           />
         </div>
 

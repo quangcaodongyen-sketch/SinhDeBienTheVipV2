@@ -197,7 +197,7 @@ const VariantsExamPage: React.FC<VariantsExamPageProps> = ({ checkAuth, onGenera
             selectedFileName={file?.name}
             onClear={reset}
             label="Kéo thả đề gốc vào đây"
-            sublabel="Hỗ trợ PDF, JPG, PNG (Mọi môn học & kỳ thi)"
+            sublabel="Hỗ trợ Word (.docx, .doc), PDF (.pdf), Ảnh (JPG, JPEG, PNG)"
           />
 
           {/* 2 Lựa chọn định dạng xuất */}

@@ -215,23 +215,22 @@ div.Section1
 body
 	{font-family:"Times New Roman",serif;
 	font-size:13.0pt;
-	line-height:20.0pt;
-	mso-line-height-rule:exactly;
-	text-align:justify;
-	text-justify:inter-ideograph;
+	line-height:1.25;
+	text-align:left;
 	color:black;}
 p.MsoNormal, p
 	{mso-style-parent:"";
 	margin-top:0cm;
-	margin-bottom:4.0pt;
-	text-align:justify;
-	text-justify:inter-ideograph;
-	text-indent:36.0pt; /* Thụt đầu dòng 1.27cm */
-	line-height:20.0pt;
-	mso-line-height-rule:exactly;
+	margin-bottom:3.5pt;
+	text-align:left;
+	line-height:1.25;
 	font-size:13.0pt;
 	font-family:"Times New Roman",serif;
 	color:black;}
+p.passage, p.essay
+	{text-align:justify;
+	text-indent:36.0pt; /* Thụt đầu dòng 1.27cm cho đoạn văn dài */
+	margin-bottom:4.0pt;}
 h1
 	{margin-top:10.0pt;
 	margin-bottom:4.0pt;

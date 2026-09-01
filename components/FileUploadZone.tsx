@@ -1,5 +1,7 @@
 import React, { useCallback, useState, useRef } from 'react';
 import { Upload, FileText, X, AlertCircle } from 'lucide-react';
+// @ts-ignore
+import mammoth from 'mammoth';
 
 interface FileUploadZoneProps {
   onFileSelect: (fileData: { base64: string; mimeType: string; name: string }) => void;
@@ -17,21 +19,25 @@ const FileUploadZone: React.FC<FileUploadZoneProps> = ({
   selectedFileName,
   onClear,
   isLoading = false,
-  accept = '.pdf,.jpg,.jpeg,.png,.webp',
-  maxSizeMB = 20,
+  accept = '.pdf,.jpg,.jpeg,.png,.webp,.doc,.docx',
+  maxSizeMB = 30,
   label = 'Kéo thả đề thi vào đây',
-  sublabel = 'hoặc click để chọn file',
+  sublabel = 'Hỗ trợ Word (.docx, .doc), PDF (.pdf), Ảnh (JPG, PNG)',
 }) => {
   const [dragActive, setDragActive] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const processFile = useCallback((file: File) => {
+  const processFile = useCallback(async (file: File) => {
     setError(null);
 
-    const validTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'];
-    if (!validTypes.includes(file.type)) {
-      setError('Chỉ hỗ trợ PDF hoặc hình ảnh (JPG, PNG, WEBP).');
+    const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+    const isImage = file.type.startsWith('image/') || /\.(jpg|jpeg|png|webp)$/i.test(file.name);
+    const isDocx = file.name.toLowerCase().endsWith('.docx') || file.type.includes('wordprocessingml');
+    const isDoc = file.name.toLowerCase().endsWith('.doc') || file.type.includes('msword');
+
+    if (!isPdf && !isImage && !isDocx && !isDoc) {
+      setError('Hỗ trợ file Word (.docx, .doc), PDF (.pdf) hoặc Hình ảnh (JPG, PNG, WEBP).');
       return;
     }
 
@@ -40,12 +46,42 @@ const FileUploadZone: React.FC<FileUploadZoneProps> = ({
       return;
     }
 
+    // Nếu là file Word .docx, dùng mammoth để trích xuất nội dung văn bản sạch
+    if (isDocx) {
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+        const result = await mammoth.extractRawText({ arrayBuffer });
+        const text = result.value || '';
+        const utf8Bytes = new TextEncoder().encode(text);
+        let binary = '';
+        for (let i = 0; i < utf8Bytes.length; i++) {
+          binary += String.fromCharCode(utf8Bytes[i]);
+        }
+        const base64 = btoa(binary);
+        onFileSelect({
+          base64,
+          mimeType: 'text/plain',
+          name: file.name,
+        });
+        return;
+      } catch (e) {
+        console.warn("Không thể trích xuất .docx bằng mammoth, chuyển sang đọc raw:", e);
+      }
+    }
+
     const reader = new FileReader();
     reader.onload = (e) => {
       const base64 = (e.target?.result as string).split(',')[1];
+      let mimeType = file.type;
+      if (!mimeType) {
+        if (file.name.toLowerCase().endsWith('.pdf')) mimeType = 'application/pdf';
+        else if (file.name.toLowerCase().endsWith('.png')) mimeType = 'image/png';
+        else if (file.name.toLowerCase().endsWith('.docx') || file.name.toLowerCase().endsWith('.doc')) mimeType = 'text/plain';
+        else mimeType = 'image/jpeg';
+      }
       onFileSelect({
         base64,
-        mimeType: file.type,
+        mimeType,
         name: file.name,
       });
     };

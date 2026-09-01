@@ -159,21 +159,34 @@ export const generateSimilarExam = async (
   for (const modelName of candidateModels) {
     try {
       console.log(`[SimilarExam] Trying model: ${modelName}`);
+
+      const parts: any[] = [];
+      if (mimeType === 'text/plain') {
+        let decoded = '';
+        try {
+          decoded = decodeURIComponent(escape(atob(base64Data)));
+        } catch {
+          try { decoded = atob(base64Data); } catch { decoded = base64Data; }
+        }
+        parts.push({ text: `NỘI DUNG ĐỀ GỐC (TRÍCH XUẤT TỪ FILE WORD):\n\n${decoded}\n\n---` });
+      } else {
+        parts.push({
+          inlineData: {
+            mimeType: mimeType,
+            data: base64Data
+          }
+        });
+      }
+
+      parts.push({
+        text: "Hãy phân tích đề thi này và tạo ra 1 đề thi tương tự kèm lời giải chi tiết theo hướng dẫn hệ thống."
+      });
+
       const response = await ai.models.generateContent({
         model: modelName,
         contents: {
           role: 'user',
-          parts: [
-            {
-              inlineData: {
-                mimeType: mimeType,
-                data: base64Data
-              }
-            },
-            {
-              text: "Hãy phân tích đề thi này và tạo ra 1 đề thi tương tự kèm lời giải chi tiết theo hướng dẫn hệ thống."
-            }
-          ]
+          parts: parts
         },
         config: {
           systemInstruction: finalSystemInstruction,
