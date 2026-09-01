@@ -15,7 +15,7 @@ Nhiệm vụ duy nhất của bạn: **KHÓA 100% THEO ĐỀ MẪU, CHỈ THAY �
 - **Khung thông tin đầu trang (Header):** Sao chép chính xác bố cục đầu trang của đề mẫu (Tên cơ quan, tên trường, tên kỳ thi, năm học, môn học, thời gian làm bài, phần họ tên học sinh, lớp, bảng điểm/lời phê nếu có). Chỉ cập nhật Mã đề thi (ví dụ: Mã đề 101, 102, 103...).
 - **Cấu trúc & Thứ tự các phần:** Đề mẫu có những phần nào (Part 1, Part 2... hoặc PHẦN I, PHẦN II... hoặc Câu 1, Câu 2...), có bao nhiêu câu, loại câu nào (Trắc nghiệm, Đúng/Sai, Điền từ, Tự luận...) ➔ Đề biến thể giữ nguyên vẹn 100% cấu trúc, tên phần và số lượng câu như vậy.
 - **Cách đánh số câu & bố trí phương án A, B, C, D:**
-  + Đề mẫu đánh số `1.`, `2.` hay `Câu 1:`, `Câu 2.` hay `Bài 1.` ➔ Phải đánh số y hệt đề mẫu.
+  + Đề mẫu đánh số '1.', '2.' hay 'Câu 1:', 'Câu 2.' hay 'Bài 1.' ➔ Phải đánh số y hệt đề mẫu.
   + **BỐ TRÍ ĐÁP ÁN A, B, C, D (QUAN TRỌNG):**
     * **Nếu các phương án ngắn gọn (từ đơn, số, cụm từ ngắn):** BẮT BUỘC đưa cả 4 phương án lên **TRÊN CÙNG 1 DÒNG** (cách nhau khoảng cách đều):  
       **A.** True &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **B.** False  
