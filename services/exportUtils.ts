@@ -120,13 +120,18 @@ export const exportToDoc = async (
   // 1. Làm sạch trước nội dung
   rawText = cleanContentForWord(rawText);
 
-  // 2. Chuyển đổi các dấu phân cách ngắt trang (*** hoặc ---) thành thẻ đánh dấu riêng trước khi render
-  rawText = rawText.replace(/\n\s*(\*{3,}|-{3,})\s*\n/g, '\n\n[[PAGE_BREAK_PLACEHOLDER]]\n\n');
+  // 2. Chuyển đổi dấu ngắt trang CHỈ KHI là dấu *** phân tách giữa Đề và Đáp án (KHÔNG ngắt trang khi gặp dấu kẻ ngang ---)
+  // Tránh việc ngắt trang ngay sau phần Header/Bảng điểm
+  rawText = rawText.replace(/\n\s*\*{3,}\s*\n/g, (match, offset) => {
+    // Không ngắt trang nếu dấu *** nằm quá gần đầu tài liệu (dưới 350 ký tự đầu là phần Header/Bảng điểm)
+    if (offset < 350) return '\n\n';
+    return '\n\n[[PAGE_BREAK_PLACEHOLDER]]\n\n';
+  });
 
   // 3. Render Markdown sang HTML bằng markdown-it
   let htmlBody = md.render(rawText);
 
-  // 4. Thay thế placeholder ngắt trang thành thẻ ngắt trang Word tương thích cao
+  // 4. Thay thế placeholder ngắt trang thành thẻ ngắt trang Word chuẩn
   htmlBody = htmlBody.replace(
     /\[\[PAGE_BREAK_PLACEHOLDER\]\]|<p>\[\[PAGE_BREAK_PLACEHOLDER\]\]<\/p>/g,
     '<br clear="all" style="page-break-before: always; mso-break-type: section-break;" />'
@@ -135,6 +140,17 @@ export const exportToDoc = async (
   // 5. Tháo bỏ bất kỳ thẻ <pre><code> nào nếu markdown-it tạo ra (để tránh font Courier New)
   htmlBody = htmlBody.replace(/<pre><code[^>]*>([\s\S]*?)<\/code><\/pre>/gi, '<div style="font-family: \'Times New Roman\', serif; font-size: 13pt;">$1</div>');
   htmlBody = htmlBody.replace(/<code[^>]*>([\s\S]*?)<\/code>/gi, '<span style="font-family: \'Times New Roman\', serif; font-size: 13pt;">$1</span>');
+
+  // 6. Tự động chuyển đổi bảng tiêu đề đầu trang thành bảng không viền (Borderless 2-Column Header)
+  htmlBody = htmlBody.replace(/<table[^>]*>([\s\S]*?)<\/table>/gi, (match, inner) => {
+    if ((inner.includes('UBND') || inner.includes('TRƯỜNG') || inner.includes('PHÒNG GD') || inner.includes('SỞ GD')) && (inner.includes('BÀI KIỂM TRA') || inner.includes('ĐỀ KIỂM TRA') || inner.includes('ĐỀ THI') || inner.includes('HỌC KỲ') || inner.includes('HỌC KÌ'))) {
+      const cleanedInner = inner
+        .replace(/<td[^>]*>/gi, '<td style="border: none !important; padding: 2pt 4pt; vertical-align: top; text-align: center;">')
+        .replace(/<th[^>]*>/gi, '<th style="border: none !important; padding: 2pt 4pt; vertical-align: top; text-align: center; background: transparent; font-weight: bold;">');
+      return `<table style="border: none !important; border-collapse: collapse; width: 100%; margin-bottom: 6pt;">${cleanedInner}</table>`;
+    }
+    return match;
+  });
 
   const leftMarginMm = formatOption === 'decree30' ? '30mm' : '20mm';
   const leftMarginTwip = formatOption === 'decree30' ? 1701 : 1134;
