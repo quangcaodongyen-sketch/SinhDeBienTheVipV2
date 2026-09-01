@@ -13,8 +13,7 @@ import { VipPricingModal } from './components/VipPricingModal';
 
 import { generateStep1Matrix, generateStep2Specs, generateStep3Exam, extractInfoFromDocument, convertMatrixFileToHtml, convertMatrixTextToHtml, extractQuestionsFromReference, getApiKey, isValidGoogleAiApiKey, setApiKey as saveApiKey, getSelectedModel, setSelectedModel } from './services/geminiService';
 import { parseDocxWithMath } from './services/docxMathParser';
-// @ts-ignore
-import { asBlob } from 'html-docx-js-typescript';
+import { exportToDoc } from './services/exportUtils';
 import { AVAILABLE_MODELS } from './constants';
 import { MATRIX_TEMPLATES } from './services/matrixTemplates';
 import { validateAccount, getRegisteredUsers, saveRegisteredUsers, isUserVipActive, deductTrialUsage, saveUserExamDocument, getSystemSettings } from './data/accounts';
@@ -706,72 +705,7 @@ const App: React.FC = () => {
   };
 
   const handleDownloadWord = async (content: string, fileName: string) => {
-    // Create a proper DOCX using html-docx-js-typescript
-    const header = `
-      <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-      <head>
-        <meta charset='utf-8'>
-        <title>${fileName}</title>
-        <style>
-          body { font-family: 'Times New Roman', serif; font-size: 13pt; line-height: 1.5; }
-          table { border-collapse: collapse; width: 100%; margin-bottom: 1rem; page-break-inside: auto; }
-          tr { page-break-inside: avoid; page-break-after: auto; }
-          td, th { border: 1px solid black; padding: 5px; vertical-align: middle; }
-          th { background-color: #f0f0f0; font-weight: bold; }
-          .question-number { font-weight: bold; }
-          p { margin-top: 0.5em; margin-bottom: 0.5em; page-break-inside: avoid; }
-          .options { page-break-inside: avoid; }
-          h1, h2, h3, h4 { page-break-after: avoid; }
-          div { page-break-inside: avoid; }
-        </style>
-      </head><body>`;
-    const footer = "</body></html>";
-
-    // If content is already a full HTML doc, inject page-break CSS; otherwise wrap it
-    let sourceHTML: string;
-    if (content.includes('<!DOCTYPE html>')) {
-      // Inject page-break CSS into existing <style> or before </head>
-      sourceHTML = content.replace(
-        /<\/style>/i,
-        `
-          table { page-break-inside: auto; }
-          tr { page-break-inside: avoid; page-break-after: auto; }
-          p { page-break-inside: avoid; }
-          .options { page-break-inside: avoid; }
-          h1, h2, h3, h4 { page-break-after: avoid; }
-          div { page-break-inside: avoid; }
-        </style>`
-      );
-    } else {
-      sourceHTML = header + content + footer;
-    }
-
-    try {
-      const blob = await asBlob(sourceHTML, {
-        orientation: 'portrait',
-        margins: { top: 850, right: 850, bottom: 850, left: 850 }
-      });
-
-      const url = URL.createObjectURL(blob as Blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `${fileName}.docx`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error('DOCX generation failed, falling back to .doc:', error);
-      // Fallback: xuất .doc nếu .docx thất bại
-      const blob = new Blob(['\ufeff', sourceHTML], { type: 'application/msword' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `${fileName}.doc`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
+    await exportToDoc(content, fileName);
   };
 
   // --- Sub-Components for Render ---
@@ -1828,7 +1762,7 @@ const App: React.FC = () => {
       {/* Footer */}
       <footer className="shrink-0 text-center py-2.5 text-xs text-slate-500 dark:text-slate-400 border-t border-slate-200/60 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 space-y-0.5">
         <p className="font-semibold text-slate-700 dark:text-slate-300">
-          Sinh Đề Biến Thể VIP © 2026 — Chuẩn Ma Trận Đặc Tả Bộ Giáo Dục & Đào Tạo
+          Sinh Đề Biến Thể VIP © 2026
         </p>
         <p className="text-[11px] text-slate-500">
           Bản quyền & Hỗ trợ kỹ thuật: <strong>Thầy giáo Đinh Văn Thành</strong> – Trường THCS Đồng Yên, tỉnh Tuyên Quang · ĐT/Zalo: <strong>0915.213717</strong>

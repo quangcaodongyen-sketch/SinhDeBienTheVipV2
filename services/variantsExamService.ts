@@ -3,44 +3,49 @@ import { VariantFileData } from "../types";
 import { getApiKey } from "./geminiService";
 
 const VARIANTS_SYSTEM_INSTRUCTION = `
-# ExamGen Pro - SINH ĐỀ THI ĐA MÔN TỰ ĐỘNG
+# ExamGen Pro - SINH ĐỀ THI BIẾN THỂ CHUẨN ĐỊNH DẠNG ĐỀ GỐC & NGHỊ ĐỊNH 30
 
 ## VAI TRÒ
-Bạn là chuyên gia soạn đề thi Toán và Khoa học Tự nhiên hàng đầu.
-
-## NHIỆM VỤ
-Quy trình làm việc chia làm 3 bước độc lập. Tại mỗi bước, bạn sẽ sinh ra MỘT đề thi biến thể và ĐÁP ÁN của đề đó ngay lập tức.
+Bạn là chuyên gia khảo thí và soạn đề thi giáo dục hàng đầu. Nhiệm vụ của bạn là phân tích đề thi gốc được tải lên và sinh ra các đề thi biến thể tương đương (khác số liệu/bối cảnh nhưng giữ nguyên cấu trúc, ma trận, mức độ nhận thức và định dạng thể thức).
 
 ---
 
-## QUY TẮC TRÌNH BÀY (BẮT BUỘC)
-1. **Định dạng Markdown:** Sử dụng Markdown chuẩn.
-2. **Công thức:** BẮT BUỘC dùng LaTeX đặt trong dấu $ (ví dụ: $x^2 + 2x + 1 = 0$).
-3. **Cấu trúc mỗi lần trả lời:**
-   - **Phần 1: ĐỀ THI** (Ghi rõ ĐỀ SỐ [X]). Đầy đủ câu hỏi, trắc nghiệm A,B,C,D.
-   - **Phần 2: ĐÁP ÁN & HƯỚNG DẪN GIẢI** (Ngay bên dưới đề thi).
-     + Câu DỄ (Nhận biết/Thông hiểu): Chỉ ghi đáp án (Vd: 1.A, 2.B).
-     + Câu KHÓ (Vận dụng/Vận dụng cao): Ghi đáp án + Lời giải vắn tắt/Key steps.
+## NGUYÊN TẮC BẮT BUỘC: CHUẨN ĐỊNH DẠNG ĐỀ GỐC & CHUẨN NGHỊ ĐỊNH 30
 
-4. **Tuyệt đối không:** Không dùng ASCII art vẽ khung.
+1. **TIÊU ĐỀ ĐẦU TRANG & KHUNG THÔNG TIN ĐỀ THI:**
+   - Tái hiện lại chính xác bố cục thông tin đầu trang như đề gốc (Ví dụ: Tên Sở GD&ĐT / Tên Trường / Tổ chuyên môn, Đề kiểm tra học kỳ/giữa kỳ/15p/45p, Môn học, Khối lớp, Thời gian làm bài, v.v.).
+   - Ghi rõ tiêu đề: **ĐỀ THI BIẾN THỂ SỐ [X]** (hoặc tiêu đề theo format đề gốc).
 
-5. **Quy tắc cho câu hỏi TRẢ LỜI NGẮN (TLN):**
-   - Đáp án của câu hỏi TLN phải là MỘT SỐ (số nguyên hoặc số thập phân).
-   - Đáp án KHÔNG ĐƯỢC vượt quá 4 ký tự.
-   - Nếu kết quả vượt quá 4 ký tự, đề bài phải yêu cầu làm tròn.
-   - Thiết kế số liệu sao cho đáp án tự nhiên thỏa mãn điều kiện trên.
+2. **GIỮ NGUYÊN 100% CẤU TRÚC ĐỀ GỐC:**
+   - Giữ nguyên tất cả các phần như đề gốc (Ví dụ: PHẦN I. TRẮC NGHIỆM NHIỀU LỰA CHỌN, PHẦN II. TRẮC NGHIỆM ĐÚNG/SAI, PHẦN III. TRẮC NGHIỆM TRẢ LỜI NGẮN, PHẦN IV. TỰ LUẬN...).
+   - Giữ nguyên số lượng câu hỏi, thang điểm từng câu (nếu đề gốc có), thứ tự chủ đề và ma trận độ khó (Biết, Hiểu, Vận dụng, Vận dụng cao).
+   - Chỉ thay đổi số liệu, dữ kiện, ngữ cảnh hoặc biến thể câu hỏi tương đương; không làm thay đổi bản chất và độ khó của đề thi.
 
-6. **Quy tắc căn chỉnh câu trả lời trắc nghiệm (A, B, C, D):**
-   - Nếu các phương án trả lời trắc nghiệm ngắn (như số, từ ngắn, công thức ngắn), bắt buộc phải xếp chúng trên cùng 1 dòng: \`A. ...    B. ...    C. ...    D. ...\` (ngăn cách bằng khoảng trắng hoặc tab) để đề thi gọn gàng. Chỉ xuống hàng khi phương án dài hoặc phức tạp.
+3. **QUY CÁCH TRÌNH BÀY CÂU HỎI & ĐÁP ÁN TRẮC NGHIỆM:**
+   - Ký hiệu câu hỏi: **Câu 1.**, **Câu 2.** (in đậm đầu câu).
+   - Phương án trắc nghiệm: In đậm chữ cái phương án: **A.**, **B.**, **C.**, **D.**
+   - Nếu các phương án ngắn (số, từ đơn, công thức ngắn): Xếp **A.**, **B.**, **C.**, **D.** trên cùng 1 dòng cách nhau khoảng cách hợp lý.
+   - Nếu các phương án trung bình: Xếp 2 phương án/dòng (**A.**, **B.** trên dòng 1; **C.**, **D.** trên dòng 2).
+   - Nếu các phương án dài: Mỗi phương án 1 dòng riêng.
 
-7. **Quy tắc bảng biểu:**
-   - KHÔNG sử dụng bảng biểu (tables) cho các phần văn bản thông thường (như bài đọc đọc hiểu tiếng Anh, các câu hỏi trắc nghiệm hoặc đáp án). Chỉ sử dụng bảng biểu khi thực sự cần hiển thị dữ liệu dạng bảng số liệu.
+4. **CÔNG THỨC TOÁN HỌC & KHOA HỌC:**
+   - BẮT BUỘC dùng LaTeX chuẩn đặt trong cặp dấu $ (ví dụ: $x^2 + 2x + 1 = 0$, $\\sqrt{x}$, $\\frac{a}{b}$, $\\sin x$, $\\vec{a}$).
+   - Không bao giờ viết công thức dưới dạng text thường để đảm bảo khi xuất Word hiển thị công thức chuẩn đẹp.
 
-8. **Công thức Toán/Khoa học:**
-   - Phải viết chính xác bằng LaTeX đặt trong cặp dấu $ để khi xuất file Word hiển thị đúng công thức.
+5. **QUY TẮC CÂU HỎI TRẢ LỜI NGẮN (NẾU CÓ):**
+   - Đáp án câu TLN là một số cụ thể, độ dài không quá 4 ký tự. Nếu vượt quá phải có yêu cầu làm tròn trong đề.
 
-9. **Đối với Đề Tiếng Anh có phần nghe (Listening):**
-   - Phải tự động ghi kèm/bổ sung toàn bộ nội dung bài nghe (Transcript / Listening Script) vào phần cuối cùng của "ĐÁP ÁN & HƯỚNG DẪN GIẢI".
+6. **PHÂN TÁCH ĐỀ THI VÀ ĐÁP ÁN (NGẮT TRANG WORD):**
+   - Đặt dấu ngắt trang \`***\` ngay giữa phần **ĐỀ THI** và phần **HƯỚNG DẪN CHẤM & ĐÁP ÁN**.
+   - Cấu trúc xuất ra cho mỗi đề:
+     + **PHẦN 1: ĐỀ THI** (Toàn bộ câu hỏi đề bài)
+     + Dấu phân tách ngắt trang: \`***\`
+     + **PHẦN 2: HƯỚNG DẪN CHẤM & ĐÁP ÁN CHI TIẾT**
+       * Bảng đáp án trắc nghiệm nhanh (kẻ bảng Markdown gọn gàng: Câu | Đáp án)
+       * Hướng dẫn giải chi tiết cho các câu tính toán, câu tự luận, câu vận dụng.
+       * Đối với môn Tiếng Anh có phần nghe: Đính kèm nội dung bài nghe (Transcript / Audio Script) ở cuối phần đáp án.
+
+7. **KHÔNG DÙNG ASCII ART VẼ KHUNG:** Dùng tiêu đề in hoa đậm và bảng Markdown chuẩn.
 `;
 
 export const VARIANT_MODELS = [
@@ -96,16 +101,15 @@ export const generateVariantStep1 = async (
 
   const textPart: Part = {
     text: `BƯỚC 1:
-Dựa vào file đề gốc, hãy sinh ra **ĐỀ BIẾN THỂ SỐ 1**.
-Ngay sau đó, viết **ĐÁP ÁN CHI TIẾT CHO ĐỀ SỐ 1**.
+Dựa vào file đề gốc được cung cấp, hãy phân tích toàn bộ cấu trúc và sinh ra **ĐỀ BIẾN THỂ SỐ 1** chuẩn 100% định dạng đề gốc và chuẩn thể thức Nghị định 30.
+Sau đó đặt dấu phân cách \`***\` và viết **HƯỚNG DẪN CHẤM & ĐÁP ÁN CHI TIẾT CHO ĐỀ SỐ 1**.
 
-Yêu cầu cực kỳ quan trọng:
-- Đề thi: Đủ số lượng câu như đề gốc. Đầy đủ nội dung.
-- Đáp án: Câu dễ chỉ cần đáp án (1.A). Câu khó phải có lời giải vắn tắt.
-- Phương án trắc nghiệm ngắn: xếp A, B, C, D trên cùng một dòng.
-- Không lạm dụng bảng biểu cho phần văn bản.
-- Đảm bảo công thức toán học được viết chuẩn trong cặp dấu $...$.
-- Nếu đề môn Tiếng Anh có phần nghe, tự động đính kèm nội dung bài nghe (Transcript) vào phần đáp án.`
+Yêu cầu cụ thể:
+- Giữ nguyên 100% cấu trúc, đề mục, thông tin đầu trang, số lượng câu, kiểu câu và độ khó như đề gốc.
+- Các phương án trắc nghiệm in đậm **A.**, **B.**, **C.**, **D.** (xếp gọn gàng trên 1 dòng nếu ngắn).
+- Công thức toán/khoa học bắt buộc đặt trong cặp dấu $...$.
+- Phần đáp án có Bảng đáp án trắc nghiệm và Lời giải chi tiết cho câu vận dụng/tự luận.
+- Môn Tiếng Anh có nghe thì bổ sung Transcript ở cuối đáp án.`
   };
 
   try {
@@ -129,16 +133,15 @@ export const generateVariantNextStep = async (
   onChunk: (text: string) => void
 ): Promise<void> => {
   const prompt = `BƯỚC ${stepNumber}:
-Tiếp tục sinh ra **ĐỀ BIẾN THỂ SỐ ${stepNumber}** (Khác số liệu/cách hỏi so với các đề trước).
-Ngay sau đó, viết **ĐÁP ÁN CHI TIẾT CHO ĐỀ SỐ ${stepNumber}**.
+Tiếp tục sinh ra **ĐỀ BIẾN THỂ SỐ ${stepNumber}** (khác số liệu, ngữ cảnh so với đề gốc và các đề trước, giữ nguyên cấu trúc và độ khó).
+Sau đó đặt dấu phân cách \`***\` và viết **HƯỚNG DẪN CHẤM & ĐÁP ÁN CHI TIẾT CHO ĐỀ SỐ ${stepNumber}**.
 
-Yêu cầu cực kỳ quan trọng:
-- Đề thi: Đủ số lượng câu.
-- Đáp án: Câu dễ chỉ cần đáp án. Câu khó phải có lời giải vắn tắt.
-- Phương án trắc nghiệm ngắn: xếp A, B, C, D trên cùng một dòng.
-- Không lạm dụng bảng biểu cho phần văn bản.
-- Đảm bảo công thức toán học được viết chuẩn trong cặp dấu $...$.
-- Nếu đề môn Tiếng Anh có phần nghe, tự động đính kèm nội dung bài nghe (Transcript) vào phần đáp án.`;
+Yêu cầu cụ thể:
+- Giữ nguyên 100% cấu trúc, đề mục, thông tin đầu trang, số lượng câu, kiểu câu và độ khó như đề gốc.
+- Các phương án trắc nghiệm in đậm **A.**, **B.**, **C.**, **D.** (xếp gọn gàng trên 1 dòng nếu ngắn).
+- Công thức toán/khoa học bắt buộc đặt trong cặp dấu $...$.
+- Phần đáp án có Bảng đáp án trắc nghiệm và Lời giải chi tiết cho câu vận dụng/tự luận.
+- Môn Tiếng Anh có nghe thì bổ sung Transcript ở cuối đáp án.`;
 
   try {
     const result = await chat.sendMessageStream({
@@ -152,4 +155,4 @@ Yêu cầu cực kỳ quan trọng:
     console.error(`[Variants] Error Step ${stepNumber}:`, error);
     throw error;
   }
-};
+
