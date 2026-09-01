@@ -152,10 +152,12 @@ export const exportToDoc = async (
     return match;
   });
 
-  const leftMarginMm = formatOption === 'decree30' ? '30mm' : '20mm';
-  const leftMarginTwip = formatOption === 'decree30' ? 1701 : 1134;
+  // 6. CSS chuẩn thể thức văn bản đề thi
+  // Khổ giấy A4: Lề trái 2.5cm, Lề trên 2.0cm, Lề dưới 2.0cm, Lề phải 2.0cm
+  // Phông chữ Times New Roman 13pt, Dãn dòng exactly 20pt, Dãn đoạn 4pt, Thụt đầu dòng 1.27cm, Căn đều 2 bên
+  const leftMarginMm = '25mm';   // 2.5 cm
+  const leftMarginTwip = 1417;   // 2.5 cm = 1417 twips
 
-  // 6. CSS chuẩn theo lựa chọn
   const css = `
     <style>
       @page {
@@ -181,58 +183,75 @@ export const exportToDoc = async (
       }
       body { 
         font-size: 13pt; 
-        line-height: 1.25; 
+        line-height: 20pt; 
+        mso-line-height-rule: exactly; 
         margin: 0;
         padding: 0;
-        text-align: left;
+        text-align: justify;
       }
       h1 { 
         font-size: 14pt; 
         font-weight: bold; 
         text-align: center; 
         text-transform: uppercase;
-        margin: 12pt 0 4pt 0; 
+        margin: 10pt 0 4pt 0; 
+        mso-margin-top-alt: 10pt;
+        mso-margin-bottom-alt: 4pt;
         page-break-after: avoid;
+        text-indent: 0 !important;
       }
       h2 { 
         font-size: 13pt; 
         font-weight: bold; 
         text-align: left;
-        margin: 10pt 0 3pt 0; 
+        margin: 8pt 0 3pt 0; 
+        mso-margin-top-alt: 8pt;
+        mso-margin-bottom-alt: 3pt;
         page-break-after: avoid;
+        text-indent: 0 !important;
       }
       h3 { 
         font-size: 13pt; 
         font-weight: bold; 
         text-align: left;
-        margin: 8pt 0 2pt 0; 
+        margin: 6pt 0 2pt 0; 
+        mso-margin-top-alt: 6pt;
+        mso-margin-bottom-alt: 2pt;
         page-break-after: avoid;
+        text-indent: 0 !important;
       }
       h4 { 
         font-size: 13pt; 
         font-weight: bold; 
         font-style: italic; 
         text-align: left;
-        margin: 6pt 0 2pt 0; 
+        margin: 4pt 0 2pt 0; 
+        mso-margin-top-alt: 4pt;
+        mso-margin-bottom-alt: 2pt;
         page-break-after: avoid;
+        text-indent: 0 !important;
       }
       p { 
         font-size: 13pt;
-        line-height: 1.25;
-        margin: 0 0 6pt 0; 
+        line-height: 20pt;
+        mso-line-height-rule: exactly;
+        margin: 0 0 4pt 0; 
+        mso-margin-top-alt: 0pt;
+        mso-margin-bottom-alt: 4pt;
         text-align: justify; 
-        text-indent: 1.27cm; /* Thụt đầu dòng 1 tab 1.27cm chuẩn thể thức văn bản */
+        text-indent: 1.27cm; /* Thụt đầu dòng 1 tab 1.27cm */
         page-break-inside: avoid;
       }
-      /* Không thụt dòng đối với tiêu đề, bảng biểu, danh sách */
+      /* Không thụt dòng đối với tiêu đề, bảng biểu, danh sách, phương án ABCD */
       h1, h2, h3, h4, h5, h6, th, td, li, .no-indent {
         text-indent: 0 !important;
       }
       table { 
         border-collapse: collapse; 
         width: 100%; 
-        margin: 6pt 0 8pt 0; 
+        margin: 4pt 0 6pt 0; 
         page-break-inside: auto;
+        text-indent: 0 !important;
       }
       tr { 
         page-break-inside: avoid; 
@@ -240,11 +259,13 @@ export const exportToDoc = async (
       }
       th, td { 
         border: 1px solid #000000; 
-        padding: 4pt 6pt; 
+        padding: 3pt 5pt; 
         text-align: left; 
         vertical-align: middle;
         font-size: 12pt;
-        line-height: 1.2;
+        line-height: 16pt;
+        mso-line-height-rule: exactly;
+        text-indent: 0 !important;
       }
       th { 
         background-color: #f2f2f2; 
@@ -255,10 +276,12 @@ export const exportToDoc = async (
         margin: 2pt 0 4pt 18pt; 
         padding: 0;
         text-align: left;
+        text-indent: 0 !important;
       }
       li { 
         margin-bottom: 2pt; 
-        line-height: 1.25;
+        line-height: 20pt;
+        mso-line-height-rule: exactly;
         font-size: 13pt;
         text-align: justify;
       }
@@ -294,14 +317,15 @@ export const exportToDoc = async (
 </body>
 </html>`;
 
-  // Margin tính theo twips
+  // Margin tính theo twips:
+  // Top: 20mm = 1134, Right: 20mm = 1134, Bottom: 20mm = 1134, Left: 25mm = 1417
   const docxOptions = {
     orientation: 'portrait',
     margins: {
-      top: 1134,    // 20mm
-      right: 1134,  // 20mm
-      bottom: 1134, // 20mm
-      left: leftMarginTwip
+      top: 1134,    // 20mm (2.0 cm)
+      right: 1134,  // 20mm (2.0 cm)
+      bottom: 1134, // 20mm (2.0 cm)
+      left: 1417    // 25mm (2.5 cm)
     }
   };
 
