@@ -219,9 +219,14 @@ export const exportToDoc = async (
       p { 
         font-size: 13pt;
         line-height: 1.25;
-        margin: 0 0 4.5pt 0; 
-        text-align: left; 
+        margin: 0 0 6pt 0; 
+        text-align: justify; 
+        text-indent: 1.27cm; /* Thụt đầu dòng 1 tab 1.27cm chuẩn thể thức văn bản */
         page-break-inside: avoid;
+      }
+      /* Không thụt dòng đối với tiêu đề, bảng biểu, danh sách */
+      h1, h2, h3, h4, h5, h6, th, td, li, .no-indent {
+        text-indent: 0 !important;
       }
       table { 
         border-collapse: collapse; 
@@ -255,7 +260,7 @@ export const exportToDoc = async (
         margin-bottom: 2pt; 
         line-height: 1.25;
         font-size: 13pt;
-        text-align: left;
+        text-align: justify;
       }
       strong, b { 
         font-weight: bold; 

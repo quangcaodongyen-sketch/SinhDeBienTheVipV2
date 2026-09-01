@@ -64,7 +64,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, className 
             <h4 className="text-sm font-bold italic text-left my-1.5 text-black">{children}</h4>
           ),
           p: ({ children }) => (
-            <p className="mb-2 leading-relaxed text-black">{children}</p>
+            <p className="mb-2 leading-relaxed text-black text-justify">{children}</p>
           ),
           hr: () => (
             <div className="my-4 border-t-2 border-dashed border-slate-300 relative text-center">
