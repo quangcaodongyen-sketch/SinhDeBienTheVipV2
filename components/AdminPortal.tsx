@@ -51,9 +51,10 @@ import {
 
 interface AdminPortalProps {
   onLogout: () => void;
+  onBackToApp?: () => void;
 }
 
-export const AdminPortal: React.FC<AdminPortalProps> = ({ onLogout }) => {
+export const AdminPortal: React.FC<AdminPortalProps> = ({ onLogout, onBackToApp }) => {
   const [users, setUsers] = useState<UserAccount[]>(() => getRegisteredUsers());
   const [settings, setSettings] = useState<SystemSettings>(() => getSystemSettings());
   const [searchQuery, setSearchQuery] = useState('');
@@ -274,6 +275,16 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onLogout }) => {
           </div>
 
           <div className="flex items-center gap-3">
+            {onBackToApp && (
+              <button
+                onClick={onBackToApp}
+                className="flex items-center gap-2 text-xs sm:text-sm bg-gradient-to-r from-teal-500 to-emerald-400 hover:from-teal-400 hover:to-emerald-300 text-slate-950 font-black px-4 py-2 rounded-xl transition-all shadow-md hover:scale-105"
+                title="Vào ứng dụng để sử dụng đầy đủ các tính năng sinh đề VIP"
+              >
+                <Sparkles className="w-4 h-4" />
+                Vào ứng dụng Sinh đề VIP
+              </button>
+            )}
             <button
               onClick={handleRefresh}
               className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 transition-colors"

@@ -80,6 +80,7 @@ const App: React.FC = () => {
   const [showApiKeyGuideModal, setShowApiKeyGuideModal] = useState(false);
   const [showVipPricingModal, setShowVipPricingModal] = useState(false);
   const [isOutOfTrialPopup, setIsOutOfTrialPopup] = useState(false);
+  const [isAdminView, setIsAdminView] = useState<boolean>(false);
 
   // -- Selected Model State --
   const [selectedModel, setSelectedModelState] = useState(getSelectedModel() || AVAILABLE_MODELS[0].id);
@@ -1362,8 +1363,8 @@ const App: React.FC = () => {
     }
   }
 
-  if (loggedInUser?.username === 'Admin') {
-    return <AdminPortal onLogout={handleLogout} />;
+  if (loggedInUser?.username.toLowerCase() === 'admin' && isAdminView) {
+    return <AdminPortal onLogout={handleLogout} onBackToApp={() => setIsAdminView(false)} />;
   }
 
   return (
@@ -1426,7 +1427,16 @@ const App: React.FC = () => {
             {/* User Account / Trial Status Badge */}
             {isAuthenticated && loggedInUser ? (
               <div className="flex items-center gap-2">
-                {isUserVipActive(loggedInUser) ? (
+                {loggedInUser.username.toLowerCase() === 'admin' ? (
+                  <button
+                    onClick={() => setIsAdminView(true)}
+                    className="flex items-center gap-1.5 text-xs bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-600 hover:to-orange-600 text-white px-3.5 py-1.5 rounded-full font-black shadow-md transition-all hover:scale-105"
+                    title="Mở Trang Quản trị Thành viên & Cài đặt hệ thống"
+                  >
+                    <Shield className="w-3.5 h-3.5" />
+                    <span>⚙️ Trang Quản trị Admin</span>
+                  </button>
+                ) : isUserVipActive(loggedInUser) ? (
                   <button
                     onClick={() => {
                       setIsOutOfTrialPopup(false);

@@ -137,18 +137,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
       return;
     }
 
-    // 3. Kiểm tra thiết bị đã từng đăng ký dùng thử chưa (Anti-abuse đa lớp)
-    const alreadyRegistered = await isDeviceRegistered();
-    if (alreadyRegistered) {
-      setError(
-        'Thiết bị này đã được sử dụng lượt dùng thử trước đó. Vui lòng đăng nhập tài khoản đã đăng ký hoặc liên hệ Admin để được hỗ trợ.'
-      );
-      setLoading(false);
-      triggerShake();
-      return;
-    }
-
-    // 4. Kiểm tra trùng tên đăng nhập hoặc số điện thoại
+    // 3. Kiểm tra trùng tên đăng nhập hoặc số điện thoại
     const users = getRegisteredUsers();
     const cleanUsername = regUsername.trim().toLowerCase();
     const cleanPhone = regPhone.trim();
