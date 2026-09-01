@@ -5,42 +5,43 @@ import { asBlob } from 'html-docx-js-typescript';
 const md = new MarkdownIt({
   html: true,
   breaks: true,
-  linkify: true
+  linkify: true,
+  typographer: true
 });
 
 /**
  * Hàm làm sạch và chuyển đổi thông minh các công thức / mã pseudo-LaTeX
  * sang định dạng văn bản và ký tự Unicode chuẩn đẹp cho Microsoft Word.
- * Xử lý triệt để các lỗi như:
- * - $\text{Subject} + \text{will} + ...$ -> Subject + will + ...
- * - $S + \text{might} + V\text{-inf}$ -> S + might + V-inf
- * - \text{...} -> ...
- * - Chuyển đổi các ký hiệu toán phổ biến (\times, \pm, \leq, \geq, \alpha, \pi, ...)
  */
 export const cleanContentForWord = (content: string): string => {
   if (!content) return '';
 
   let text = content;
 
-  // 1. Loại bỏ \text{...} lặp lại (hỗ trợ nested)
+  // 0. Bóc bỏ triệt để các khối code block ```markdown ... ``` hoặc ``` ... ``` nếu Gemini bọc ngoài
+  text = text.replace(/^```[a-zA-Z]*\r?\n?/gm, '').replace(/\r?\n?```$/gm, '');
+
+  // 1. Loại bỏ các thẻ HTML rác có thể làm vỡ parser markdown-it
+  text = text.replace(/<div[^>]*style="[^"]*page-break[^"]*"[^>]*><\/div>/gi, '\n\n***\n\n');
+  text = text.replace(/<div[^>]*>/gi, '\n').replace(/<\/div>/gi, '\n');
+
+  // 2. Loại bỏ \text{...}, \mathrm{...}, \mathbf{...} lặp lại
   for (let i = 0; i < 5; i++) {
-    if (!text.includes('\\text{') && !text.includes('\\mathrm{') && !text.includes('\\mathbf{')) break;
+    if (!text.includes('\\text{') && !text.includes('\\mathrm{') && !text.includes('\\mathbf{') && !text.includes('\\mathit{')) break;
     text = text.replace(/\\(?:text|mathrm|mathbf|mathit)\{([^{}]+)\}/g, '$1');
   }
 
-  // 2. Chuyển đổi các cấu trúc ngữ pháp tiếng Anh hoặc văn bản bị bọc trong $...$
-  // Ví dụ: $S + might + V-inf$, $If + S + V$, $\text{...}$
+  // 3. Chuyển đổi các cấu trúc ngữ pháp tiếng Anh hoặc văn bản bị bọc trong $...$
   text = text.replace(/\$([^\$\n]+)\$/g, (match, inner) => {
     const trimmed = inner.trim();
-    // Nếu chứa các từ ngữ pháp tiếng Anh hoặc từ vựng thường, gỡ bỏ dấu $
-    const englishGrammarWords = /Subject|verb|object|present|past|future|simple|continuous|perfect|singular|plural|might|will|would|could|should|can|must|have|has|had|inf|V-inf|V-ing|V-ed|V_inf|V_ing|clause|condition|recycle|house|energy/i;
+    const englishGrammarWords = /Subject|verb|object|present|past|future|simple|continuous|perfect|singular|plural|might|will|would|could|should|can|must|have|has|had|inf|V-inf|V-ing|V-ed|V_inf|V_ing|clause|condition|recycle|house|energy|sentence/i;
     if (englishGrammarWords.test(trimmed) || (!/[\\_^]/.test(trimmed) && /[a-zA-Z]{3,}/.test(trimmed))) {
       return trimmed;
     }
     return match;
   });
 
-  // 3. Chuyển đổi các ký hiệu toán học phổ biến sang ký tự Unicode tương ứng
+  // 4. Chuyển đổi các ký hiệu toán học phổ biến sang ký tự Unicode tương ứng
   const symbolMap: [RegExp, string][] = [
     [/\\times\b/g, '×'],
     [/\\div\b/g, '÷'],
@@ -84,18 +85,17 @@ export const cleanContentForWord = (content: string): string => {
     text = text.replace(pattern, replacement);
   }
 
-  // 4. Xử lý phân số đơn giản \frac{a}{b} -> a/b hoặc (a)/(b) nếu là công thức ngắn
+  // 5. Xử lý phân số đơn giản \frac{a}{b} -> (a)/(b)
   text = text.replace(/\\frac\{([^{}]+)\}\{([^{}]+)\}/g, '($1)/($2)');
 
-  // 5. Xử lý căn bậc hai \sqrt{x} -> √(x)
+  // 6. Xử lý căn bậc hai \sqrt{x} -> √(x)
   text = text.replace(/\\sqrt\{([^{}]+)\}/g, '√($1)');
 
-  // 6. Xử lý vector \vec{a} -> a→ hoặc vec(a)
+  // 7. Xử lý vector \vec{a} -> a→
   text = text.replace(/\\vec\{([^{}]+)\}/g, '$1→');
 
-  // 7. Gỡ bỏ dấu $ còn sót lại quanh các biểu thức đã được chuyển đổi sạch
+  // 8. Gỡ bỏ dấu $ còn sót lại quanh các biểu thức chữ thường
   text = text.replace(/\$([A-Za-z0-9\s\+\-\=\(\)\,\.\/\:\;\?\!\'\"]{1,80})\$/g, (match, inner) => {
-    // Nếu chỉ là chữ cái và phép tính cơ bản không có ký hiệu đặc thù LaTeX
     if (!inner.includes('\\') && !inner.includes('^') && !inner.includes('_')) {
       return inner.trim();
     }
@@ -111,53 +111,64 @@ export const cleanContentForWord = (content: string): string => {
  * - Định lề trang: Trên 20mm, Dưới 20mm, Trái 30mm (đóng gáy), Phải 20mm
  * - Phông chữ: Times New Roman, cỡ chữ 13pt (bảng biểu 12pt)
  * - Dãn dòng: 1.25 lines, dãn đoạn: 0pt / 4pt
- * - Căn lề: Căn trái (Left-aligned) cho tiêu đề/câu hỏi/đáp án để tránh giãn cách chữ quá mức
+ * - Căn lề: Căn trái (Left-aligned) cho tiêu đề/câu hỏi/đáp án
  * - Bảng biểu viền đen 1px, tiêu đề cột in đậm căn giữa
- * - Hỗ trợ ngắt trang (Page Break) giữa Đề và Đáp án / giữa các Đề biến thể
+ * - Hỗ trợ ngắt trang (Page Break) chuẩn giữa Đề và Đáp án / giữa các Đề biến thể
  */
 export const exportToDoc = async (markdownOrHtmlContent: string, fileName: string) => {
-  let htmlBody: string;
+  let rawText = markdownOrHtmlContent || '';
 
-  if (markdownOrHtmlContent.trim().startsWith('<!DOCTYPE html>') || markdownOrHtmlContent.trim().startsWith('<html')) {
-    // Làm sạch nội dung HTML
-    const cleanedHtml = cleanContentForWord(markdownOrHtmlContent);
-    htmlBody = cleanedHtml;
-  } else {
-    // 1. Làm sạch công thức / pseudo-LaTeX trong markdown
-    const cleanedMarkdown = cleanContentForWord(markdownOrHtmlContent);
+  // 1. Làm sạch trước nội dung
+  rawText = cleanContentForWord(rawText);
 
-    // 2. Render markdown to HTML
-    htmlBody = md.render(cleanedMarkdown);
+  // 2. Chuyển đổi các dấu phân cách ngắt trang (*** hoặc ---) thành thẻ đánh dấu riêng trước khi render
+  rawText = rawText.replace(/\n\s*(\*{3,}|-{3,})\s*\n/g, '\n\n[[PAGE_BREAK_PLACEHOLDER]]\n\n');
 
-    // 3. Chuyển đổi các thẻ <hr> (từ *** hoặc ---) thành Page Break chuẩn Word
-    htmlBody = htmlBody.replace(
-      /<hr\s*\/?>/gi,
-      '<div style="page-break-before: always; mso-break-type: section-break; clear: both; height: 0; line-height: 0; font-size: 0;"></div>'
-    );
-  }
+  // 3. Render Markdown sang HTML bằng markdown-it
+  let htmlBody = md.render(rawText);
 
-  // CSS chuẩn Nghị định 30/2020/NĐ-CP & Thể thức trình bày đề thi
-  // Chú ý: Dùng text-align: left làm chủ đạo để tránh lỗi dãn khoảng cách chữ (stretched words) khi dùng justify
+  // 4. Thay thế placeholder ngắt trang thành thẻ ngắt trang Word tương thích cao
+  htmlBody = htmlBody.replace(
+    /\[\[PAGE_BREAK_PLACEHOLDER\]\]|<p>\[\[PAGE_BREAK_PLACEHOLDER\]\]<\/p>/g,
+    '<br clear="all" style="page-break-before: always; mso-break-type: section-break;" />'
+  );
+
+  // 5. Tháo bỏ bất kỳ thẻ <pre><code> nào nếu markdown-it tạo ra (để tránh font Courier New)
+  htmlBody = htmlBody.replace(/<pre><code[^>]*>([\s\S]*?)<\/code><\/pre>/gi, '<div style="font-family: \'Times New Roman\', serif; font-size: 13pt;">$1</div>');
+  htmlBody = htmlBody.replace(/<code[^>]*>([\s\S]*?)<\/code>/gi, '<span style="font-family: \'Times New Roman\', serif; font-size: 13pt;">$1</span>');
+
+  // 6. CSS chuẩn Nghị định 30/2020/NĐ-CP & Thể thức văn thư giáo dục
   const css = `
     <style>
       @page {
-        size: A4 portrait;
+        size: 210mm 297mm;
         margin: 20mm 20mm 20mm 30mm; /* Trên 20mm, Phải 20mm, Dưới 20mm, Trái 30mm */
         mso-header-margin: 36pt;
         mso-footer-margin: 36pt;
         mso-paper-source: 0;
       }
+      @page Section1 {
+        size: 210mm 297mm;
+        margin: 20mm 20mm 20mm 30mm;
+        mso-header-margin: 36pt;
+        mso-footer-margin: 36pt;
+        mso-paper-source: 0;
+      }
+      div.Section1 {
+        page: Section1;
+      }
+      *, body, p, div, span, td, th, li, a, h1, h2, h3, h4, h5, h6 {
+        font-family: 'Times New Roman', Times, serif !important;
+        color: #000000 !important;
+      }
       body { 
-        font-family: 'Times New Roman', Times, serif; 
         font-size: 13pt; 
         line-height: 1.25; 
-        color: #000000;
         margin: 0;
         padding: 0;
         text-align: left;
       }
       h1 { 
-        font-family: 'Times New Roman', Times, serif;
         font-size: 14pt; 
         font-weight: bold; 
         text-align: center; 
@@ -166,7 +177,6 @@ export const exportToDoc = async (markdownOrHtmlContent: string, fileName: strin
         page-break-after: avoid;
       }
       h2 { 
-        font-family: 'Times New Roman', Times, serif;
         font-size: 13pt; 
         font-weight: bold; 
         text-align: left;
@@ -174,7 +184,6 @@ export const exportToDoc = async (markdownOrHtmlContent: string, fileName: strin
         page-break-after: avoid;
       }
       h3 { 
-        font-family: 'Times New Roman', Times, serif;
         font-size: 13pt; 
         font-weight: bold; 
         text-align: left;
@@ -182,7 +191,6 @@ export const exportToDoc = async (markdownOrHtmlContent: string, fileName: strin
         page-break-after: avoid;
       }
       h4 { 
-        font-family: 'Times New Roman', Times, serif;
         font-size: 13pt; 
         font-weight: bold; 
         font-style: italic; 
@@ -191,10 +199,9 @@ export const exportToDoc = async (markdownOrHtmlContent: string, fileName: strin
         page-break-after: avoid;
       }
       p { 
-        font-family: 'Times New Roman', Times, serif;
         font-size: 13pt;
         line-height: 1.25;
-        margin: 0 0 4pt 0; 
+        margin: 0 0 4.5pt 0; 
         text-align: left; 
         page-break-inside: avoid;
       }
@@ -213,7 +220,6 @@ export const exportToDoc = async (markdownOrHtmlContent: string, fileName: strin
         padding: 4pt 6pt; 
         text-align: left; 
         vertical-align: middle;
-        font-family: 'Times New Roman', Times, serif;
         font-size: 12pt;
         line-height: 1.2;
       }
@@ -222,24 +228,8 @@ export const exportToDoc = async (markdownOrHtmlContent: string, fileName: strin
         font-weight: bold; 
         text-align: center;
       }
-      .table-header-cell {
-        font-weight: bold;
-        text-align: center;
-      }
-      .table-center-cell {
-        text-align: center;
-      }
-      table.header-table, table.borderless-table {
-        border: none !important;
-        margin-bottom: 8pt;
-      }
-      table.header-table td, table.borderless-table td {
-        border: none !important;
-        padding: 2pt 4pt;
-        vertical-align: top;
-      }
       ol, ul { 
-        margin: 2pt 0 4pt 15pt; 
+        margin: 2pt 0 4pt 18pt; 
         padding: 0;
         text-align: left;
       }
@@ -255,46 +245,33 @@ export const exportToDoc = async (markdownOrHtmlContent: string, fileName: strin
       em, i { 
         font-style: italic; 
       }
-      .page-break {
-        page-break-before: always;
-        mso-break-type: section-break;
-        clear: both;
-        height: 0;
-        line-height: 0;
-        font-size: 0;
-      }
-      .question-title {
-        font-weight: bold;
-        text-align: left;
-      }
-      .options-group {
-        margin: 2pt 0 4pt 0;
-        page-break-inside: avoid;
-        text-align: left;
-      }
     </style>
   `;
 
-  let fullHtml: string;
-  if (htmlBody.includes('<!DOCTYPE html>') || htmlBody.includes('<html')) {
-    fullHtml = htmlBody.replace(/<\/head>/i, `${css}</head>`);
-  } else {
-    fullHtml = `
-      <!DOCTYPE html>
-      <html lang="vi" xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-        <head>
-          <meta charset="utf-8">
-          <title>${fileName}</title>
-          ${css}
-        </head>
-        <body>
-          ${htmlBody}
-        </body>
-      </html>
-    `;
-  }
+  const fullHtml = `<!DOCTYPE html>
+<html lang="vi" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+  <meta charset="utf-8">
+  <title>${fileName}</title>
+  <!--[if gte mso 9]>
+  <xml>
+    <w:WordDocument>
+      <w:View>Print</w:View>
+      <w:Zoom>100</w:Zoom>
+      <w:DoNotOptimizeForBrowser/>
+    </w:WordDocument>
+  </xml>
+  <![endif]-->
+  ${css}
+</head>
+<body>
+  <div class="Section1">
+    ${htmlBody}
+  </div>
+</body>
+</html>`;
 
-  // Margin Nghị định 30 tính theo twips (1mm = 56.7 twips):
+  // Margin Nghị định 30 tính theo twips:
   // Top: 20mm = 1134, Right: 20mm = 1134, Bottom: 20mm = 1134, Left: 30mm = 1701
   const docxOptions = {
     orientation: 'portrait',
@@ -302,7 +279,7 @@ export const exportToDoc = async (markdownOrHtmlContent: string, fileName: strin
       top: 1134,    // 20mm
       right: 1134,  // 20mm
       bottom: 1134, // 20mm
-      left: 1701    // 30mm (chuẩn đóng gáy)
+      left: 1701    // 30mm
     }
   };
 
@@ -319,7 +296,7 @@ export const exportToDoc = async (markdownOrHtmlContent: string, fileName: strin
   } catch (error) {
     console.error("DOCX generation failed, falling back to .doc:", error);
     try {
-      const docBlob = new Blob(['\ufeff', fullHtml], { type: 'application/msword' });
+      const docBlob = new Blob(['\ufeff', fullHtml], { type: 'application/msword;charset=utf-8' });
       const url = URL.createObjectURL(docBlob);
       const link = document.createElement('a');
       link.href = url;
@@ -334,5 +311,6 @@ export const exportToDoc = async (markdownOrHtmlContent: string, fileName: strin
     }
   }
 };
+
 
 
