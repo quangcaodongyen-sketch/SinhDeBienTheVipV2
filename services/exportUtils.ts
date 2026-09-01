@@ -106,16 +106,15 @@ export const cleanContentForWord = (content: string): string => {
 };
 
 /**
- * Xuất file Word (.docx) chuẩn Nghị định 30/2020/NĐ-CP:
- * - Khổ giấy A4 (210mm x 297mm), định hướng đứng
- * - Định lề trang: Trên 20mm, Dưới 20mm, Trái 30mm (đóng gáy), Phải 20mm
- * - Phông chữ: Times New Roman, cỡ chữ 13pt (bảng biểu 12pt)
- * - Dãn dòng: 1.25 lines, dãn đoạn: 0pt / 4pt
- * - Căn lề: Căn trái (Left-aligned) cho tiêu đề/câu hỏi/đáp án
- * - Bảng biểu viền đen 1px, tiêu đề cột in đậm căn giữa
- * - Hỗ trợ ngắt trang (Page Break) chuẩn giữa Đề và Đáp án / giữa các Đề biến thể
+ * Xuất file Word (.docx) hỗ trợ 2 chế độ:
+ * 1. 'original': Chuẩn theo đề gốc (Lề đều 20mm, giữ nguyên phong cách đề gốc)
+ * 2. 'decree30': Chuẩn Nghị định 30/2020/NĐ-CP (Lề Trái 30mm đóng gáy, Trên/Dưới/Phải 20mm, A4, Times New Roman 13pt)
  */
-export const exportToDoc = async (markdownOrHtmlContent: string, fileName: string) => {
+export const exportToDoc = async (
+  markdownOrHtmlContent: string, 
+  fileName: string,
+  formatOption: 'original' | 'decree30' = 'original'
+) => {
   let rawText = markdownOrHtmlContent || '';
 
   // 1. Làm sạch trước nội dung
@@ -137,19 +136,22 @@ export const exportToDoc = async (markdownOrHtmlContent: string, fileName: strin
   htmlBody = htmlBody.replace(/<pre><code[^>]*>([\s\S]*?)<\/code><\/pre>/gi, '<div style="font-family: \'Times New Roman\', serif; font-size: 13pt;">$1</div>');
   htmlBody = htmlBody.replace(/<code[^>]*>([\s\S]*?)<\/code>/gi, '<span style="font-family: \'Times New Roman\', serif; font-size: 13pt;">$1</span>');
 
-  // 6. CSS chuẩn Nghị định 30/2020/NĐ-CP & Thể thức văn thư giáo dục
+  const leftMarginMm = formatOption === 'decree30' ? '30mm' : '20mm';
+  const leftMarginTwip = formatOption === 'decree30' ? 1701 : 1134;
+
+  // 6. CSS chuẩn theo lựa chọn
   const css = `
     <style>
       @page {
         size: 210mm 297mm;
-        margin: 20mm 20mm 20mm 30mm; /* Trên 20mm, Phải 20mm, Dưới 20mm, Trái 30mm */
+        margin: 20mm 20mm 20mm ${leftMarginMm};
         mso-header-margin: 36pt;
         mso-footer-margin: 36pt;
         mso-paper-source: 0;
       }
       @page Section1 {
         size: 210mm 297mm;
-        margin: 20mm 20mm 20mm 30mm;
+        margin: 20mm 20mm 20mm ${leftMarginMm};
         mso-header-margin: 36pt;
         mso-footer-margin: 36pt;
         mso-paper-source: 0;
@@ -271,15 +273,14 @@ export const exportToDoc = async (markdownOrHtmlContent: string, fileName: strin
 </body>
 </html>`;
 
-  // Margin Nghị định 30 tính theo twips:
-  // Top: 20mm = 1134, Right: 20mm = 1134, Bottom: 20mm = 1134, Left: 30mm = 1701
+  // Margin tính theo twips
   const docxOptions = {
     orientation: 'portrait',
     margins: {
       top: 1134,    // 20mm
       right: 1134,  // 20mm
       bottom: 1134, // 20mm
-      left: 1701    // 30mm
+      left: leftMarginTwip
     }
   };
 

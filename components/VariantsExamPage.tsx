@@ -21,6 +21,7 @@ const VariantsExamPage: React.FC<VariantsExamPageProps> = ({ checkAuth, onGenera
   const [col3, setCol3] = useState('');
   const [state, setState] = useState<VariantState>(VariantState.IDLE);
   const [error, setError] = useState<string | null>(null);
+  const [exportFormat, setExportFormat] = useState<'original' | 'decree30'>('original');
 
   const chatSessionRef = useRef<Chat | null>(null);
   const currentModelIndexRef = useRef<number>(0);
@@ -92,7 +93,7 @@ const VariantsExamPage: React.FC<VariantsExamPageProps> = ({ checkAuth, onGenera
       await executeStepWithRetry(
         "Step 1",
         async (chat) => {
-          await generateVariantStep1(chat, file, (chunk) => setCol1(prev => prev + chunk));
+          await generateVariantStep1(chat, file, (chunk) => setCol1(prev => prev + chunk), exportFormat);
         },
         () => setCol1('')
       );
@@ -107,7 +108,7 @@ const VariantsExamPage: React.FC<VariantsExamPageProps> = ({ checkAuth, onGenera
       await executeStepWithRetry(
         "Step 2",
         async (chat) => {
-          await generateVariantNextStep(chat, 2, (chunk) => setCol2(prev => prev + chunk));
+          await generateVariantNextStep(chat, 2, (chunk) => setCol2(prev => prev + chunk), exportFormat);
         },
         () => setCol2('')
       );
@@ -126,7 +127,7 @@ const VariantsExamPage: React.FC<VariantsExamPageProps> = ({ checkAuth, onGenera
           await generateVariantNextStep(chat, 3, (chunk) => {
             setCol3(prev => prev + chunk);
             finalCol3 += chunk;
-          });
+          }, exportFormat);
         },
         () => {
           setCol3('');
@@ -165,7 +166,7 @@ const VariantsExamPage: React.FC<VariantsExamPageProps> = ({ checkAuth, onGenera
     if (!col1 && !col2 && !col3) return;
     const fullContent = `${col1}\n\n***\n\n${col2}\n\n***\n\n${col3}`;
     const fileName = file ? `Bo_3_De_Thi_${file.name.split('.')[0]}` : 'ExamGen_Output';
-    exportToDoc(fullContent, fileName);
+    exportToDoc(fullContent, fileName, exportFormat);
   };
 
   const reset = () => {
@@ -185,24 +186,74 @@ const VariantsExamPage: React.FC<VariantsExamPageProps> = ({ checkAuth, onGenera
           <h2 className="text-3xl font-extrabold text-teal-900 tracking-tight">
             Sinh <span className="text-blue-600">3 đề biến thể</span> từ 1 đề gốc
           </h2>
-          <p className="text-base text-slate-600 max-w-xl mx-auto leading-relaxed">
-            Tải lên đề gốc (PDF/Ảnh). Hệ thống sẽ tự động sinh 3 đề biến thể kèm đáp án chi tiết theo quy trình 3 bước.
+          <p className="text-base text-slate-600 max-w-2xl mx-auto leading-relaxed">
+            Áp dụng cho <strong>tất cả các môn học</strong> (Toán, Ngữ Văn, Tiếng Anh, Lý, Hóa, Sinh, Sử, Địa, GDCD, Tin học...). Tự động nhận diện cấu trúc đề gốc của mọi kỳ thi (15p, Giữa kỳ, Cuối kỳ, HSG...) và sinh 3 đề biến thể chuẩn 100% định dạng.
           </p>
         </div>
 
-        <div className="card-elevated p-6">
+        <div className="card-elevated p-6 space-y-6">
           <FileUploadZone
             onFileSelect={handleFileSelect}
             selectedFileName={file?.name}
             onClear={reset}
             label="Kéo thả đề gốc vào đây"
-            sublabel="Hỗ trợ PDF, JPG, PNG"
+            sublabel="Hỗ trợ PDF, JPG, PNG (Mọi môn học & kỳ thi)"
           />
+
+          {/* 2 Lựa chọn định dạng xuất */}
+          <div className="space-y-3 pt-2">
+            <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
+              <span>Lựa chọn định dạng xuất đề:</span>
+            </label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <label 
+                className={`flex items-start gap-3 p-3.5 rounded-xl border-2 cursor-pointer transition-all ${
+                  exportFormat === 'original' 
+                    ? 'border-teal-600 bg-teal-50/50 shadow-sm' 
+                    : 'border-slate-200 hover:border-slate-300 bg-white'
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="exportFormat"
+                  value="original"
+                  checked={exportFormat === 'original'}
+                  onChange={() => setExportFormat('original')}
+                  className="mt-1 text-teal-600 focus:ring-teal-500"
+                />
+                <div>
+                  <div className="font-bold text-sm text-slate-900">1. Xuất chuẩn theo đề gốc</div>
+                  <div className="text-xs text-slate-500 mt-0.5">Mặc định: Giữ 100% khung tiêu đề, cấu trúc và cách trình bày của đề đưa lên.</div>
+                </div>
+              </label>
+
+              <label 
+                className={`flex items-start gap-3 p-3.5 rounded-xl border-2 cursor-pointer transition-all ${
+                  exportFormat === 'decree30' 
+                    ? 'border-teal-600 bg-teal-50/50 shadow-sm' 
+                    : 'border-slate-200 hover:border-slate-300 bg-white'
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="exportFormat"
+                  value="decree30"
+                  checked={exportFormat === 'decree30'}
+                  onChange={() => setExportFormat('decree30')}
+                  className="mt-1 text-teal-600 focus:ring-teal-500"
+                />
+                <div>
+                  <div className="font-bold text-sm text-slate-900">2. Chuẩn Nghị định 30/2020</div>
+                  <div className="text-xs text-slate-500 mt-0.5">Chuẩn hóa thể thức văn bản: A4, Lề Trái 30mm đóng gáy, Times New Roman 13pt.</div>
+                </div>
+              </label>
+            </div>
+          </div>
 
           <button
             onClick={runProcess}
             disabled={!file}
-            className={`w-full mt-6 flex items-center justify-center gap-3 py-4 px-6 rounded-xl font-bold text-lg transition-all
+            className={`w-full flex items-center justify-center gap-3 py-4 px-6 rounded-xl font-bold text-lg transition-all
               ${!file
                 ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
                 : 'bg-gradient-to-r from-teal-600 to-emerald-600 text-white hover:shadow-lg hover:-translate-y-0.5 active:scale-95'
@@ -293,14 +344,24 @@ const VariantsExamPage: React.FC<VariantsExamPageProps> = ({ checkAuth, onGenera
           {renderStepIndicator(VariantState.PROCESSING_STEP_3, "Đề 3")}
 
           {/* Actions */}
-          <div className="ml-4 pl-4 border-l border-slate-200 flex items-center gap-2">
+          <div className="ml-4 pl-4 border-l border-slate-200 flex items-center gap-3">
+            <select
+              value={exportFormat}
+              onChange={(e) => setExportFormat(e.target.value as 'original' | 'decree30')}
+              className="text-xs bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 font-medium text-slate-700 focus:outline-none focus:ring-1 focus:ring-teal-500 cursor-pointer"
+              title="Định dạng xuất Word"
+            >
+              <option value="original">1. Chuẩn đề gốc</option>
+              <option value="decree30">2. Chuẩn NĐ 30/2020</option>
+            </select>
+
             <button
               onClick={handleExport}
               disabled={!col1}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-lg text-xs font-medium transition-colors disabled:opacity-50"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-all shadow-sm disabled:opacity-50"
             >
               <Download className="w-3.5 h-3.5" />
-              Word (.docx)
+              Tải Word (.docx)
             </button>
             {state === VariantState.COMPLETE && (
               <button onClick={reset} className="p-1.5 text-slate-400 hover:bg-slate-100 rounded-full" title="Làm mới">
