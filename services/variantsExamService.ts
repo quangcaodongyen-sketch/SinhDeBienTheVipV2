@@ -32,20 +32,20 @@ Bạn là chuyên gia khảo thí và soạn đề thi giáo dục hàng đầu.
    - **Đối với Toán, Vật lý, Hóa học:** Dùng LaTeX chuẩn bọc trong cặp dấu $ (ví dụ: $x^2 + 2x + 1 = 0$, $\\sqrt{x}$, $\\frac{a}{b}$, $\\sin x$).
    - **⛔ ĐỐI VỚI TIẾNG ANH, NGỮ VĂN VÀ CÁC MÔN XÃ HỘI:**
      + **TUYỆT ĐỐI KHÔNG** dùng ký hiệu $ hay lệnh \\text{} cho các cấu trúc ngữ pháp hay câu tiếng Anh!
-     + **VIẾT HOÀN TOÀN BẰNG VĂN BẢN THƯỜNG (PLAIN TEXT):** Viết `S + might + V-inf`, `Subject + will + verb + object`, `If + S + V(present simple), S + will + V-inf`.
+     + **VIẾT HOÀN TOÀN BẰNG VĂN BẢN THƯỜNG (PLAIN TEXT):** Viết "S + might + V-inf", "Subject + will + verb + object", "If + S + V(present simple), S + will + V-inf".
      + **CẤM VIẾT:** $\\text{Subject} + \\text{will}...$ ❌ hay $S + \\text{might}...$ ❌.
 
 5. **QUY TẮC CÂU HỎI TRẢ LỜI NGẮN (NẾU CÓ):**
    - Đáp án câu TLN là một số cụ thể, độ dài không quá 4 ký tự. Nếu vượt quá phải có yêu cầu làm tròn trong đề.
 
 6. **PHÂN TÁCH ĐỀ THI VÀ ĐÁP ÁN (NGẮT TRANG WORD):**
-   - Đặt dấu ngắt trang \`***\` ngay giữa phần **ĐỀ THI** và phần **HƯỚNG DẪN CHẤM & ĐÁP ÁN**.
+   - Đặt dấu ngắt trang *** ngay giữa phần **ĐỀ THI** và phần **HƯỚNG DẪN CHẤM & ĐÁP ÁN**.
    - Cấu trúc xuất ra cho mỗi đề:
      + **PHẦN 1: ĐỀ THI** (Toàn bộ câu hỏi đề bài theo format đề gốc)
-     + Dấu phân tách ngắt trang: \`***\`
+     + Dấu phân tách ngắt trang: ***
      + **PHẦN 2: HƯỚNG DẪN CHẤM & ĐÁP ÁN CHI TIẾT**
        * Bảng đáp án trắc nghiệm nhanh (kẻ bảng Markdown gọn gàng: Câu | Đáp án)
-       * Hướng dẫn giải chi tiết cho các câu (Trình bày gọn gàng: `**Câu 1.** **Đáp án A.** **Giải thích:** Cấu trúc...` - không dùng danh sách bullet points thụt lề nhiều cấp).
+       * Hướng dẫn giải chi tiết cho các câu (Trình bày gọn gàng: "**Câu 1.** **Đáp án A.** **Giải thích:** Cấu trúc..." - không dùng danh sách bullet points thụt lề nhiều cấp).
        * Đối với môn Tiếng Anh có phần nghe: Đính kèm nội dung bài nghe (Transcript / Audio Script) ở cuối phần đáp án.
 
 7. **KHÔNG DÙNG ASCII ART VẼ KHUNG:** Dùng tiêu đề in hoa đậm và bảng Markdown chuẩn.
@@ -105,7 +105,7 @@ export const generateVariantStep1 = async (
   const textPart: Part = {
     text: `BƯỚC 1:
 Dựa vào file đề gốc được cung cấp, hãy phân tích toàn bộ cấu trúc và sinh ra **ĐỀ BIẾN THỂ SỐ 1** chuẩn 100% định dạng đề gốc và chuẩn thể thức Nghị định 30.
-Sau đó đặt dấu phân cách \`***\` và viết **HƯỚNG DẪN CHẤM & ĐÁP ÁN CHI TIẾT CHO ĐỀ SỐ 1**.
+Sau đó đặt dấu phân cách *** và viết **HƯỚNG DẪN CHẤM & ĐÁP ÁN CHI TIẾT CHO ĐỀ SỐ 1**.
 
 Yêu cầu cụ thể:
 - Giữ nguyên 100% cấu trúc, đề mục, thông tin đầu trang, số lượng câu, kiểu câu và độ khó như đề gốc.
@@ -137,7 +137,7 @@ export const generateVariantNextStep = async (
 ): Promise<void> => {
   const prompt = `BƯỚC ${stepNumber}:
 Tiếp tục sinh ra **ĐỀ BIẾN THỂ SỐ ${stepNumber}** (khác số liệu, ngữ cảnh so với đề gốc và các đề trước, giữ nguyên cấu trúc và độ khó).
-Sau đó đặt dấu phân cách \`***\` và viết **HƯỚNG DẪN CHẤM & ĐÁP ÁN CHI TIẾT CHO ĐỀ SỐ ${stepNumber}**.
+Sau đó đặt dấu phân cách *** và viết **HƯỚNG DẪN CHẤM & ĐÁP ÁN CHI TIẾT CHO ĐỀ SỐ ${stepNumber}**.
 
 Yêu cầu cụ thể:
 - Giữ nguyên 100% cấu trúc, đề mục, thông tin đầu trang, số lượng câu, kiểu câu và độ khó như đề gốc.
